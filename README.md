@@ -1,4 +1,14 @@
-# Azure Application Gateway Terraform Module
+<p align="center">
+  <a href="https://aircloud.com.pl"><img src=".github/assets/banner.png" alt="AIRCLOUD: DevOps, cloud and AI engineering" width="100%"></a>
+</p>
+
+# azure-application-gateway-module
+
+**Azure Application Gateway Terraform module — parameterised, azurerm 4.x, CI-validated.**
+
+[![CI](https://github.com/AIRCLOUD-PL/azure-application-gateway-module/actions/workflows/ci.yml/badge.svg)](https://github.com/AIRCLOUD-PL/azure-application-gateway-module/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/AIRCLOUD-PL/azure-application-gateway-module?sort=semver)](https://github.com/AIRCLOUD-PL/azure-application-gateway-module/releases)
 
 This Terraform module creates an Azure Application Gateway with enterprise-grade features including Web Application Firewall (WAF), SSL/TLS termination, load balancing, path-based routing, health probes, and comprehensive monitoring.
 
@@ -31,11 +41,32 @@ Internet
 
 ## Usage
 
+Pin the module to a release tag:
+
+```hcl
+module "application_gateway" {
+  source = "git::https://github.com/AIRCLOUD-PL/azure-application-gateway-module.git?ref=v1.0.0"
+
+  # required inputs
+  backend_address_pools      = {}
+  backend_http_settings      = {}
+  environment                = "..."
+  frontend_ip_configurations = {}
+  gateway_ip_configurations  = {}
+  http_listeners             = {}
+  location                   = "..."
+  request_routing_rules      = {}
+  resource_group_name        = "..."
+}
+```
+
+All inputs and outputs are listed in the generated reference below ([Inputs](#inputs), [Outputs](#outputs)). Worked examples live in [`examples/`](examples/).
+
 ### Basic Example
 
 ```hcl
 module "application_gateway" {
-  source = "./modules/network/application-gateway"
+  source = "git::https://github.com/AIRCLOUD-PL/azure-application-gateway-module.git?ref=v1.0.0"
 
   # Resource Configuration
   resource_group_name = "rg-app-gateway"
@@ -115,7 +146,7 @@ module "application_gateway" {
 
 ```hcl
 module "application_gateway_waf" {
-  source = "./modules/network/application-gateway"
+  source = "git::https://github.com/AIRCLOUD-PL/azure-application-gateway-module.git?ref=v1.0.0"
 
   # Resource Configuration
   resource_group_name = "rg-app-gateway-prod"
@@ -278,77 +309,6 @@ module "application_gateway_waf" {
 }
 ```
 
-## Requirements
-
-| Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 3.80.0 |
-
-## Providers
-
-| Name | Version |
-|------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 3.80.0 |
-
-## Modules
-
-No modules.
-
-## Resources
-
-| Name | Type |
-|------|------|
-| [azurerm_application_gateway.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_gateway) | resource |
-| [azurerm_policy_assignment.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/policy_assignment) | resource |
-| [azurerm_monitor_diagnostic_setting.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
-
-## Inputs
-
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group | `string` | n/a | yes |
-| <a name="input_location"></a> [location](#input\_location) | Azure region for resources | `string` | n/a | yes |
-| <a name="input_environment"></a> [environment](#input\_environment) | Environment name (dev, test, prod) | `string` | n/a | yes |
-| <a name="input_application_gateway_name"></a> [application\_gateway\_name](#input\_application\_gateway\_name) | Name of the Application Gateway | `string` | n/a | yes |
-| <a name="input_sku"></a> [sku](#input\_sku) | SKU configuration for the Application Gateway | <pre>object({<br>    name     = string<br>    tier     = string<br>    capacity = optional(number)<br>  })</pre> | n/a | yes |
-| <a name="input_gateway_ip_configurations"></a> [gateway\_ip\_configurations](#input\_gateway\_ip\_configurations) | Gateway IP configurations | <pre>map(object({<br>    name      = string<br>    subnet_id = string<br>  }))</pre> | n/a | yes |
-| <a name="input_frontend_ip_configurations"></a> [frontend\_ip\_configurations](#input\_frontend\_ip\_configurations) | Frontend IP configurations | <pre>map(object({<br>    name                            = string<br>    public_ip_address_id            = optional(string)<br>    private_ip_address              = optional(string)<br>    private_ip_address_allocation   = optional(string)<br>    subnet_id                       = optional(string)<br>  }))</pre> | n/a | yes |
-| <a name="input_backend_address_pools"></a> [backend\_address\_pools](#input\_backend\_address\_pools) | Backend address pools configuration | <pre>map(object({<br>    name         = string<br>    ip_addresses = optional(list(string))<br>    fqdns        = optional(list(string))<br>  }))</pre> | `{}` | no |
-| <a name="input_backend_http_settings"></a> [backend\_http\_settings](#input\_backend\_http\_settings) | Backend HTTP settings configuration | <pre>map(object({<br>    name                                = string<br>    port                                = number<br>    protocol                            = string<br>    cookie_based_affinity               = optional(string)<br>    affinity_cookie_name                = optional(string)<br>    path                                = optional(string)<br>    request_timeout                     = optional(number)<br>    host_name                           = optional(string)<br>    pick_host_name_from_backend_address = optional(bool)<br>    probe_name                          = optional(string)<br>    trusted_root_certificate_names      = optional(list(string))<br>  }))</pre> | `{}` | no |
-| <a name="input_http_listeners"></a> [http\_listeners](#input\_http\_listeners) | HTTP listeners configuration | <pre>map(object({<br>    name                           = string<br>    frontend_ip_configuration_name = string<br>    frontend_port_name             = string<br>    protocol                       = string<br>    host_name                      = optional(string)<br>    host_names                     = optional(list(string))<br>    require_sni                    = optional(bool)<br>    ssl_certificate_name           = optional(string)<br>    ssl_profile_name               = optional(string)<br>    firewall_policy_id             = optional(string)<br>  }))</pre> | `{}` | no |
-| <a name="input_request_routing_rules"></a> [request\_routing\_rules](#input\_request\_routing\_rules) | Request routing rules configuration | <pre>map(object({<br>    name                        = string<br>    http_listener_name          = string<br>    backend_address_pool_name   = optional(string)<br>    backend_http_settings_name  = optional(string)<br>    url_path_map_name           = optional(string)<br>    redirect_configuration_name = optional(string)<br>    rewrite_rule_set_name       = optional(string)<br>    priority                    = optional(number)<br>  }))</pre> | `{}` | no |
-| <a name="input_frontend_ports"></a> [frontend\_ports](#input\_frontend\_ports) | Frontend ports configuration | <pre>map(object({<br>    name = string<br>    port = number<br>  }))</pre> | `{}` | no |
-| <a name="input_ssl_certificates"></a> [ssl\_certificates](#input\_ssl\_certificates) | SSL certificates configuration | <pre>map(object({<br>    name              = string<br>    data              = string<br>    password          = optional(string)<br>    key_vault_secret_id = optional(string)<br>  }))</pre> | `{}` | no |
-| <a name="input_probes"></a> [probes](#input\_probes) | Health probes configuration | <pre>map(object({<br>    name                                    = string<br>    protocol                                = string<br>    path                                    = string<br>    interval                                = number<br>    timeout                                 = number<br>    unhealthy_threshold                     = number<br>    pick_host_name_from_backend_http_settings = optional(bool)<br>    minimum_servers                          = optional(number)<br>    match                                   = optional(object({<br>      body        = optional(string)<br>      status_code = optional(list(string))<br>    }))<br>  }))</pre> | `{}` | no |
-| <a name="input_url_path_maps"></a> [url\_path\_maps](#input\_url\_path\_maps) | URL path maps for path-based routing | <pre>map(object({<br>    name                               = string<br>    default_backend_address_pool_name  = string<br>    default_backend_http_settings_name = string<br>    default_rewrite_rule_set_name      = optional(string)<br>    path_rules                         = list(object({<br>      name                       = string<br>      paths                      = list(string)<br>      backend_address_pool_name  = string<br>      backend_http_settings_name = string<br>      rewrite_rule_set_name      = optional(string)<br>      redirect_configuration_name = optional(string)<br>    }))<br>  }))</pre> | `{}` | no |
-| <a name="input_redirect_configurations"></a> [redirect\_configurations](#input\_redirect\_configurations) | Redirect configurations | <pre>map(object({<br>    name                 = string<br>    redirect_type        = string<br>    target_listener_name = optional(string)<br>    target_url           = optional(string)<br>    include_path         = optional(bool)<br>    include_query_string = optional(bool)<br>  }))</pre> | `{}` | no |
-| <a name="input_rewrite_rule_sets"></a> [rewrite\_rule\_sets](#input\_rewrite\_rule\_sets) | Rewrite rule sets | <pre>map(object({<br>    name = string<br>    rewrite_rules = list(object({<br>      name          = string<br>      rule_sequence = number<br>      conditions    = optional(list(object({<br>        variable    = string<br>        pattern     = string<br>        ignore_case = optional(bool)<br>        negate      = optional(bool)<br>      })))<br>      request_header_configurations = optional(list(object({<br>        header_name  = string<br>        header_value = string<br>      })))<br>      response_header_configurations = optional(list(object({<br>        header_name  = string<br>        header_value = string<br>      })))<br>    }))<br>  }))</pre> | `{}` | no |
-| <a name="input_waf_configuration"></a> [waf\_configuration](#input\_waf\_configuration) | WAF configuration | <pre>object({<br>    enabled                  = bool<br>    firewall_mode           = string<br>    rule_set_type           = string<br>    rule_set_version        = string<br>    file_upload_limit_mb    = optional(number)<br>    request_body_check      = optional(bool)<br>    max_request_body_size_kb = optional(number)<br>    disabled_rule_groups    = optional(list(object({<br>      rule_group_name = string<br>      rules           = optional(list(number))<br>    })))<br>    exclusions = optional(list(object({<br>      match_variable          = string<br>      selector_match_operator = string<br>      selector                = string<br>    })))<br>  })</pre> | `null` | no |
-| <a name="input_ssl_policy"></a> [ssl\_policy](#input\_ssl\_policy) | SSL policy configuration | <pre>object({<br>    disabled_protocols   = optional(list(string))<br>    policy_type          = optional(string)<br>    policy_name          = optional(string)<br>    cipher_suites        = optional(list(string))<br>    min_protocol_version = optional(string)<br>  })</pre> | `null` | no |
-| <a name="input_autoscale_configuration"></a> [autoscale\_configuration](#input\_autoscale\_configuration) | Autoscale configuration | <pre>object({<br>    min_capacity = number<br>    max_capacity = number<br>  })</pre> | `null` | no |
-| <a name="input_identity"></a> [identity](#input\_identity) | Managed identity configuration | <pre>object({<br>    type         = string<br>    identity_ids = optional(list(string))<br>  })</pre> | `null` | no |
-| <a name="input_zones"></a> [zones](#input\_zones) | Availability zones | `list(string)` | `[]` | no |
-| <a name="input_enable_http2"></a> [enable\_http2](#input\_enable\_http2) | Enable HTTP/2 support | `bool` | `true` | no |
-| <a name="input_force_firewall_policy_association"></a> [force\_firewall\_policy\_association](#input\_force\_firewall\_policy\_association) | Force firewall policy association | `bool` | `false` | no |
-| <a name="input_diagnostic_settings"></a> [diagnostic\_settings](#input\_diagnostic\_settings) | Diagnostic settings configuration | <pre>object({<br>    name                           = optional(string)<br>    log_analytics_workspace_id     = optional(string)<br>    storage_account_id             = optional(string)<br>    eventhub_name                  = optional(string)<br>    eventhub_authorization_rule_id = optional(string)<br>    logs = optional(list(object({<br>      category        = string<br>      enabled         = bool<br>      retention_policy = optional(object({<br>        enabled = bool<br>        days    = number<br>      }))<br>    })))<br>    metrics = optional(list(object({<br>      category        = string<br>      enabled         = bool<br>      retention_policy = optional(object({<br>        enabled = bool<br>        days    = number<br>      }))<br>    })))<br>  })</pre> | `null` | no |
-| <a name="input_enable_policy_assignments"></a> [enable\_policy\_assignments](#input\_enable\_policy\_assignments) | Enable Azure Policy assignments | `bool` | `false` | no |
-| <a name="input_policy_assignments"></a> [policy\_assignments](#input\_policy\_assignments) | Azure Policy assignments | <pre>map(object({<br>    policy_definition_id = string<br>    display_name         = string<br>    description          = optional(string)<br>    parameters           = optional(string)<br>  }))</pre> | `{}` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to resources | `map(string)` | `{}` | no |
-
-## Outputs
-
-| Name | Description |
-|------|-------------|
-| <a name="output_application_gateway_id"></a> [application\_gateway\_id](#output\_application\_gateway\_id) | The ID of the Application Gateway |
-| <a name="output_application_gateway_name"></a> [application\_gateway\_name](#output\_application\_gateway\_name) | The name of the Application Gateway |
-| <a name="output_frontend_ip_configurations"></a> [frontend\_ip\_configurations](#output\_frontend\_ip\_configurations) | Frontend IP configurations |
-| <a name="output_backend_address_pools"></a> [backend\_address\_pools](#output\_backend\_address\_pools) | Backend address pools |
-| <a name="output_http_listeners"></a> [http\_listeners](#output\_http\_listeners) | HTTP listeners |
-| <a name="output_request_routing_rules"></a> [request\_routing\_rules](#output\_request\_routing\_rules) | Request routing rules |
-| <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | Resource group name |
-| <a name="output_location"></a> [location](#output\_location) | Azure region |
-
 ## Testing
 
 Run the tests using Terratest:
@@ -385,13 +345,23 @@ The module configures:
 ## License
 
 This module is licensed under the MIT License.
+
+## Reference
+
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 4.0 |
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.81.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | 3.9.1 |
 
 ## Modules
 
@@ -399,15 +369,88 @@ No modules.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [azurerm_application_gateway.main](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/application_gateway) | resource |
+| [azurerm_monitor_diagnostic_setting.diagnostic_settings](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
+| [azurerm_policy_definition.app_gateway_ssl_policy](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/policy_definition) | resource |
+| [azurerm_subscription_policy_assignment.app_gateway_diagnostics](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subscription_policy_assignment) | resource |
+| [azurerm_subscription_policy_assignment.app_gateway_error_pages](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subscription_policy_assignment) | resource |
+| [azurerm_subscription_policy_assignment.app_gateway_https](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subscription_policy_assignment) | resource |
+| [azurerm_subscription_policy_assignment.app_gateway_private_policy](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subscription_policy_assignment) | resource |
+| [azurerm_subscription_policy_assignment.app_gateway_probes](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subscription_policy_assignment) | resource |
+| [azurerm_subscription_policy_assignment.app_gateway_sku_policy](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subscription_policy_assignment) | resource |
+| [azurerm_subscription_policy_assignment.app_gateway_ssl_assignment](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subscription_policy_assignment) | resource |
+| [azurerm_subscription_policy_assignment.app_gateway_waf_policy](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subscription_policy_assignment) | resource |
+| [random_string.suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
+| [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
 
 ## Inputs
 
-No inputs.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_application_gateway_name"></a> [application\_gateway\_name](#input\_application\_gateway\_name) | Name of the Application Gateway. If null, will be auto-generated. | `string` | `null` | no |
+| <a name="input_autoscale_configuration"></a> [autoscale\_configuration](#input\_autoscale\_configuration) | Autoscale configuration for the Application Gateway | <pre>object({<br/>    min_capacity = number<br/>    max_capacity = number<br/>  })</pre> | `null` | no |
+| <a name="input_backend_address_pools"></a> [backend\_address\_pools](#input\_backend\_address\_pools) | Backend address pools configuration | <pre>map(object({<br/>    name         = string<br/>    fqdns        = optional(list(string), [])<br/>    ip_addresses = optional(list(string), [])<br/>  }))</pre> | n/a | yes |
+| <a name="input_backend_http_settings"></a> [backend\_http\_settings](#input\_backend\_http\_settings) | Backend HTTP settings configuration | <pre>map(object({<br/>    name                                = string<br/>    cookie_based_affinity               = optional(string, "Disabled")<br/>    affinity_cookie_name                = optional(string)<br/>    path                                = optional(string)<br/>    port                                = number<br/>    protocol                            = string<br/>    request_timeout                     = optional(number, 30)<br/>    host_name                           = optional(string)<br/>    pick_host_name_from_backend_address = optional(bool, false)<br/>    probe_name                          = optional(string)<br/>    trusted_root_certificate_names      = optional(list(string), [])<br/>    connection_draining = optional(object({<br/>      enabled           = bool<br/>      drain_timeout_sec = number<br/>    }))<br/>  }))</pre> | n/a | yes |
+| <a name="input_diagnostic_settings"></a> [diagnostic\_settings](#input\_diagnostic\_settings) | Diagnostic settings configurations | <pre>map(object({<br/>    name                       = string<br/>    log_analytics_workspace_id = string<br/>    logs = list(object({<br/>      category = string<br/>    }))<br/>    metrics = list(object({<br/>      category = string<br/>      enabled  = bool<br/>    }))<br/>  }))</pre> | `{}` | no |
+| <a name="input_enable_custom_policies"></a> [enable\_custom\_policies](#input\_enable\_custom\_policies) | Enable custom Azure Policy definitions | `bool` | `false` | no |
+| <a name="input_enable_http2"></a> [enable\_http2](#input\_enable\_http2) | Enable HTTP/2 protocol | `bool` | `true` | no |
+| <a name="input_enable_policy_assignments"></a> [enable\_policy\_assignments](#input\_enable\_policy\_assignments) | Enable Azure Policy assignments for Application Gateway security | `bool` | `false` | no |
+| <a name="input_environment"></a> [environment](#input\_environment) | Environment name (e.g., prod, dev, test) | `string` | n/a | yes |
+| <a name="input_firewall_policy_id"></a> [firewall\_policy\_id](#input\_firewall\_policy\_id) | ID of the Web Application Firewall policy | `string` | `null` | no |
+| <a name="input_frontend_ip_configurations"></a> [frontend\_ip\_configurations](#input\_frontend\_ip\_configurations) | Frontend IP configurations | <pre>map(object({<br/>    name                          = string<br/>    public_ip_address_id          = optional(string)<br/>    private_ip_address            = optional(string)<br/>    subnet_id                     = optional(string)<br/>    private_ip_address_allocation = optional(string, "Dynamic")<br/>  }))</pre> | n/a | yes |
+| <a name="input_frontend_ports"></a> [frontend\_ports](#input\_frontend\_ports) | Frontend ports configuration | <pre>map(object({<br/>    name = string<br/>    port = number<br/>  }))</pre> | <pre>{<br/>  "http": {<br/>    "name": "http",<br/>    "port": 80<br/>  },<br/>  "https": {<br/>    "name": "https",<br/>    "port": 443<br/>  }<br/>}</pre> | no |
+| <a name="input_gateway_ip_configurations"></a> [gateway\_ip\_configurations](#input\_gateway\_ip\_configurations) | IP configurations for the Application Gateway | <pre>map(object({<br/>    name      = string<br/>    subnet_id = string<br/>    primary   = optional(bool, false)<br/>  }))</pre> | n/a | yes |
+| <a name="input_http_listeners"></a> [http\_listeners](#input\_http\_listeners) | HTTP listeners configuration | <pre>map(object({<br/>    name                           = string<br/>    frontend_ip_configuration_name = string<br/>    frontend_port_name             = string<br/>    protocol                       = string<br/>    host_name                      = optional(string)<br/>    host_names                     = optional(list(string), [])<br/>    require_sni                    = optional(bool, false)<br/>    ssl_certificate_name           = optional(string)<br/>    ssl_profile_name               = optional(string)<br/>    firewall_policy_id             = optional(string)<br/>    custom_error_configuration = optional(list(object({<br/>      status_code           = string<br/>      custom_error_page_url = string<br/>    })), [])<br/>  }))</pre> | n/a | yes |
+| <a name="input_identity"></a> [identity](#input\_identity) | Managed identity configuration | <pre>object({<br/>    type         = string<br/>    identity_ids = optional(list(string), [])<br/>  })</pre> | `null` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region where resources will be created | `string` | n/a | yes |
+| <a name="input_log_analytics_workspace_id"></a> [log\_analytics\_workspace\_id](#input\_log\_analytics\_workspace\_id) | Log Analytics Workspace ID for diagnostic settings | `string` | `null` | no |
+| <a name="input_naming_prefix"></a> [naming\_prefix](#input\_naming\_prefix) | Prefix for Application Gateway naming | `string` | `"agw"` | no |
+| <a name="input_probes"></a> [probes](#input\_probes) | Health probes configuration | <pre>map(object({<br/>    name                                      = string<br/>    host                                      = optional(string)<br/>    interval                                  = optional(number, 30)<br/>    path                                      = string<br/>    port                                      = optional(number)<br/>    protocol                                  = string<br/>    timeout                                   = optional(number, 30)<br/>    unhealthy_threshold                       = optional(number, 3)<br/>    pick_host_name_from_backend_http_settings = optional(bool, false)<br/>    minimum_servers                           = optional(number, 0)<br/>    match = optional(object({<br/>      body        = optional(string)<br/>      status_code = optional(list(string), ["200-399"])<br/>    }))<br/>  }))</pre> | `{}` | no |
+| <a name="input_redirect_configurations"></a> [redirect\_configurations](#input\_redirect\_configurations) | Redirect configurations | <pre>map(object({<br/>    name                 = string<br/>    redirect_type        = string<br/>    target_listener_name = optional(string)<br/>    target_url           = optional(string)<br/>    include_path         = optional(bool, true)<br/>    include_query_string = optional(bool, true)<br/>  }))</pre> | `{}` | no |
+| <a name="input_request_routing_rules"></a> [request\_routing\_rules](#input\_request\_routing\_rules) | Request routing rules configuration | <pre>map(object({<br/>    name                        = string<br/>    rule_type                   = optional(string, "Basic")<br/>    http_listener_name          = string<br/>    backend_address_pool_name   = optional(string)<br/>    backend_http_settings_name  = optional(string)<br/>    redirect_configuration_name = optional(string)<br/>    rewrite_rule_set_name       = optional(string)<br/>    url_path_map_name           = optional(string)<br/>    priority                    = optional(number)<br/>  }))</pre> | n/a | yes |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Name of the resource group | `string` | n/a | yes |
+| <a name="input_rewrite_rule_sets"></a> [rewrite\_rule\_sets](#input\_rewrite\_rule\_sets) | Rewrite rule sets | <pre>map(object({<br/>    name = string<br/>    rewrite_rules = optional(list(object({<br/>      name          = string<br/>      rule_sequence = number<br/>      conditions = optional(list(object({<br/>        variable    = string<br/>        pattern     = string<br/>        ignore_case = optional(bool, false)<br/>        negate      = optional(bool, false)<br/>      })), [])<br/>      request_header_configurations = optional(list(object({<br/>        header_name  = string<br/>        header_value = string<br/>      })), [])<br/>      response_header_configurations = optional(list(object({<br/>        header_name  = string<br/>        header_value = string<br/>      })), [])<br/>      url = optional(object({<br/>        path         = optional(string)<br/>        query_string = optional(string)<br/>        components   = optional(string)<br/>        reroute      = optional(bool, false)<br/>      }))<br/>    })), [])<br/>  }))</pre> | `{}` | no |
+| <a name="input_sku"></a> [sku](#input\_sku) | SKU configuration for the Application Gateway | <pre>object({<br/>    name     = string<br/>    tier     = string<br/>    capacity = optional(number, 2)<br/>  })</pre> | <pre>{<br/>  "capacity": 2,<br/>  "name": "Standard_v2",<br/>  "tier": "Standard_v2"<br/>}</pre> | no |
+| <a name="input_ssl_certificates"></a> [ssl\_certificates](#input\_ssl\_certificates) | SSL certificates configuration | <pre>map(object({<br/>    name                = string<br/>    key_vault_secret_id = optional(string)<br/>    data                = optional(string)<br/>    password            = optional(string)<br/>  }))</pre> | `{}` | no |
+| <a name="input_ssl_profiles"></a> [ssl\_profiles](#input\_ssl\_profiles) | SSL profiles for custom SSL/TLS policies | <pre>map(object({<br/>    name                             = string<br/>    trusted_client_certificate_names = optional(list(string), [])<br/>    verify_client_cert_issuer_dn     = optional(bool, false)<br/>    ssl_policy = optional(object({<br/>      disabled_protocols   = optional(list(string), [])<br/>      policy_type          = optional(string, "Predefined")<br/>      policy_name          = optional(string, "AppGwSslPolicy20170401S")<br/>      cipher_suites        = optional(list(string), [])<br/>      min_protocol_version = optional(string, "TLSv1_2")<br/>    }))<br/>    client_auth_configuration = optional(object({<br/>      verify_client_cert_issuer_dn         = bool<br/>      verify_client_certificate_revocation = string<br/>    }))<br/>  }))</pre> | `{}` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tags to apply to all resources | `map(string)` | `{}` | no |
+| <a name="input_trusted_root_certificates"></a> [trusted\_root\_certificates](#input\_trusted\_root\_certificates) | Trusted root certificates for backend authentication | <pre>map(object({<br/>    name = string<br/>    data = string<br/>  }))</pre> | `{}` | no |
+| <a name="input_url_path_maps"></a> [url\_path\_maps](#input\_url\_path\_maps) | URL path maps for advanced routing | <pre>map(object({<br/>    name                                = string<br/>    default_backend_address_pool_name   = optional(string)<br/>    default_backend_http_settings_name  = optional(string)<br/>    default_redirect_configuration_name = optional(string)<br/>    default_rewrite_rule_set_name       = optional(string)<br/>    path_rules = optional(list(object({<br/>      name                        = string<br/>      paths                       = list(string)<br/>      backend_address_pool_name   = optional(string)<br/>      backend_http_settings_name  = optional(string)<br/>      redirect_configuration_name = optional(string)<br/>      rewrite_rule_set_name       = optional(string)<br/>      firewall_policy_id          = optional(string)<br/>    })), [])<br/>  }))</pre> | `{}` | no |
+| <a name="input_waf_configuration"></a> [waf\_configuration](#input\_waf\_configuration) | Web Application Firewall configuration | <pre>object({<br/>    enabled          = bool<br/>    firewall_mode    = string<br/>    rule_set_type    = optional(string, "OWASP")<br/>    rule_set_version = optional(string, "3.2")<br/>    disabled_rule_groups = optional(list(object({<br/>      rule_group_name = string<br/>      rules           = optional(list(string), [])<br/>    })), [])<br/>    exclusions = optional(list(object({<br/>      match_variable          = string<br/>      selector_match_operator = optional(string)<br/>      selector                = optional(string)<br/>    })), [])<br/>    file_upload_limit_mb     = optional(number, 100)<br/>    request_body_check       = optional(bool, true)<br/>    max_request_body_size_kb = optional(number, 128)<br/>  })</pre> | `null` | no |
+| <a name="input_zones"></a> [zones](#input\_zones) | Availability zones for the Application Gateway | `list(string)` | `[]` | no |
 
 ## Outputs
 
-No outputs.
-
-<!-- BEGIN_TF_DOCS -->
+| Name | Description |
+|------|-------------|
+| <a name="output_application_gateway_id"></a> [application\_gateway\_id](#output\_application\_gateway\_id) | Application Gateway resource ID |
+| <a name="output_application_gateway_name"></a> [application\_gateway\_name](#output\_application\_gateway\_name) | Application Gateway name |
+| <a name="output_backend_address_pools"></a> [backend\_address\_pools](#output\_backend\_address\_pools) | Backend address pools |
+| <a name="output_backend_http_settings"></a> [backend\_http\_settings](#output\_backend\_http\_settings) | Backend HTTP settings |
+| <a name="output_environment"></a> [environment](#output\_environment) | Environment name |
+| <a name="output_frontend_ip_configurations"></a> [frontend\_ip\_configurations](#output\_frontend\_ip\_configurations) | Frontend IP configurations |
+| <a name="output_frontend_ports"></a> [frontend\_ports](#output\_frontend\_ports) | Frontend ports |
+| <a name="output_http_listeners"></a> [http\_listeners](#output\_http\_listeners) | HTTP listeners |
+| <a name="output_identity"></a> [identity](#output\_identity) | Managed identity |
+| <a name="output_location"></a> [location](#output\_location) | Azure region |
+| <a name="output_private_ip_addresses"></a> [private\_ip\_addresses](#output\_private\_ip\_addresses) | Private IP addresses of the Application Gateway |
+| <a name="output_probes"></a> [probes](#output\_probes) | Health probes |
+| <a name="output_public_ip_addresses"></a> [public\_ip\_addresses](#output\_public\_ip\_addresses) | Public IP addresses associated with the Application Gateway |
+| <a name="output_redirect_configurations"></a> [redirect\_configurations](#output\_redirect\_configurations) | Redirect configurations |
+| <a name="output_request_routing_rules"></a> [request\_routing\_rules](#output\_request\_routing\_rules) | Request routing rules |
+| <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | Resource group name |
+| <a name="output_rewrite_rule_sets"></a> [rewrite\_rule\_sets](#output\_rewrite\_rule\_sets) | Rewrite rule sets |
+| <a name="output_sku"></a> [sku](#output\_sku) | Application Gateway SKU |
+| <a name="output_ssl_certificates"></a> [ssl\_certificates](#output\_ssl\_certificates) | SSL certificates |
+| <a name="output_tags"></a> [tags](#output\_tags) | Resource tags |
+| <a name="output_url_path_maps"></a> [url\_path\_maps](#output\_url\_path\_maps) | URL path maps |
+| <a name="output_waf_configuration"></a> [waf\_configuration](#output\_waf\_configuration) | WAF configuration |
 <!-- END_TF_DOCS -->
+
+---
+
+## Part of the AIRCLOUD Azure module catalog
+
+Browse all modules with usage snippets in the [module catalog](https://aircloud-pl.github.io/) or on [github.com/AIRCLOUD-PL](https://github.com/AIRCLOUD-PL). Built and maintained by [AIRCLOUD](https://aircloud.com.pl): DevOps, cloud and AI engineering. Need a hand with Azure landing zones or platform engineering? See [aircloud.com.pl/consulting](https://aircloud.com.pl/consulting).
